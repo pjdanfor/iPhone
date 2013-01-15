@@ -28,26 +28,51 @@
 	return scene;
 }
 
+- (void) gameLogic:(ccTime)dt {
+    [self addMonster];
+}
+
+- (void) addMonster {
+    CCSprite *monster = [CCSprite spriteWithFile:@"monster.png"];
+    
+    // Determine where to spawn the monster along the Y axis
+    CGSize winSize = [CCDirector sharedDirector].winSize;
+    int minY = monster.contentSize.height/2;
+    int maxY = winSize.height - minY;
+    int rangeY = maxY - minY;
+    int actualY = (arc4random() % rangeY) + minY;
+    
+    // Create monster slightly off screen along right edge,
+    // and along a random position
+    monster.position = ccp(winSize.width + monster.contentSize.width/2, actualY);
+    [self addChild:monster];
+    
+    // Determine monster speed
+    int minDuration = 2.0;
+    int maxDuration = 4.0;
+    int rangeDuration = maxDuration - minDuration;
+    int actualDuration = (arc4random() % rangeDuration) + minDuration;
+    
+    // Create the actions
+    CCMoveTo *actionMove = [CCMoveTo actionWithDuration:actualDuration
+                                               position:ccp(-monster.contentSize.width/2, actualY)];
+    CCCallBlockN *actionMoveDone = [CCCallBlockN actionWithBlock: ^(CCNode *node) {
+        [node removeFromParentAndCleanup:YES]; 
+    }];
+    [monster runAction:[CCSequence actions:actionMove, actionMoveDone, nil]];
+}
+
 // on "init" you need to initialize your instance
 -(id) init
 {
-	// always call "super" init
-	// Apple recommends to re-assign "self" with the "super" return value
-	if( (self=[super init])) {
-		
-		// create and initialize a Label
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Hello World" fontName:@"Marker Felt" fontSize:64];
-
-		// ask director the the window size
-		CGSize size = [[CCDirector sharedDirector] winSize];
-	
-		// position the label on the center of the screen
-		label.position =  ccp( size.width /2 , size.height/2 );
-		
-		// add the label as a child to this Layer
-		[self addChild: label];
-	}
-	return self;
+	if ((self = [super initWithColor:ccc4(255, 255, 255, 255)])) {
+        CGSize winSize = [CCDirector sharedDirector].winSize;
+        CCSprite *player = [CCSprite spriteWithFile:@"player.png"];
+        player.position = ccp(player.contentSize.width/2, winSize.height/2);
+        [self addChild:player];
+    }
+    [self schedule:@selector(gameLogic:) interval:1.0];
+    return self;
 }
 
 // on "dealloc" you need to release all your retained objects
