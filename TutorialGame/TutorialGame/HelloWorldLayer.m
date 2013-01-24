@@ -9,6 +9,7 @@
 
 // Import the interfaces
 #import "HelloWorldLayer.h"
+#import "SimpleAudioEngine.h"
 
 // HelloWorldLayer implementation
 @implementation HelloWorldLayer
@@ -111,6 +112,8 @@ NSMutableArray * _projectiles;
          [_projectiles removeObject:node];
      }],
       nil]];
+    
+    [[SimpleAudioEngine sharedEngine] playEffect:@"pew-pew-lei.caf"];
 }
 
 - (void) update:(ccTime)dt {
@@ -152,10 +155,13 @@ NSMutableArray * _projectiles;
         
         _monsters = [[NSMutableArray alloc] init];
         _projectiles = [[NSMutableArray alloc] init];
+        
+        [self schedule:@selector(update:)];
+        [self schedule:@selector(gameLogic:) interval:1.0];
+        [self setIsTouchEnabled:YES];
+        
+        [[SimpleAudioEngine sharedEngine] playBackgroundMusic:@"background-music-aac.caf"];
     }
-    [self schedule:@selector(update:)];
-    [self schedule:@selector(gameLogic:) interval:1.0];
-    [self setIsTouchEnabled:YES];
     return self;
 }
 
